@@ -17,16 +17,21 @@
 
 #Get linecount from file
 linecount <- function(filename){
-	sargs <- sprintf(" %s | awk '{print $1}'", filename)
+    if (file.exists(filename)) {
+	sargs <- sprintf(" %s | awk '{print $1}'", sprintf("%s/%s", getwd(), filename))
 	lines <- system2("wc",sargs, stdout=TRUE)
-	#Only give line counts if the file exists
-	if (length(lines) > 0){
-			lines <- as.numeric(lines)
-		}
-	else{
-		lines <- NA 
-	}
-	return(lines) 
+        #Only give line counts if the file exists
+        if (length(lines) > 0){
+            lines <- as.numeric(lines)
+        }
+        else{
+            lines <- NA
+        }
+    } else {
+        lines <- NA
+    }
+
+	return(lines)
 
 }
 
@@ -34,11 +39,11 @@ linecount <- function(filename){
 #To query churn by time range pass in i.e. "1 month ago"
 gitchurn <- function(git_date_range) {
 	if(missing(git_date_range)){
-		sargs <- "log --all -M -C --name-only --format='format:' | grep -v '^$'" 
+		sargs <- "log --all -M -C --name-only --format='format:' | grep -v '^$'"
 	}
 		else{
 		sargs <- sprintf("log --all -M -C --name-only --format='format:' --since='%s' | grep -v '^$'", git_date_range)
-	} 
+	}
 	churnoutput <- system2("git", sargs, stdout=TRUE, stderr=TRUE)
 	return(churnoutput)
 }
